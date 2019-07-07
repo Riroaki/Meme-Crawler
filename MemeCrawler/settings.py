@@ -124,4 +124,4 @@ DRIVER_PATH = 'driver/chromedriver'
 # Time control for selenium (sec)
 TIMEOUT = 10
 POLL_FREQUENCY = 2
-RANDOM_SLEEP_BASE = 3
+RANDOM_SLEEP_BASE = 5

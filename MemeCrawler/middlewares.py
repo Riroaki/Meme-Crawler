@@ -65,13 +65,16 @@ class SeleniumMiddleware(object):
             # 200 success
             # Moss CAPTCHA
             elif self.driver.page_source.count('hello moss') > 0:
+                # You can try manually do the CAPTCHA
+                sleep(10)
+                # Jiki will be closed
                 response = HtmlResponse(url=request.url,
                                         body=self.driver.page_source,
                                         request=request,
                                         encoding='utf-8',
                                         status=200)
             else:
-                # Get width
+                # Get item height
                 card = self.wait.until(
                     expected_conditions.presence_of_element_located(
                         (By.CSS_SELECTOR, '.full-card.container.full-card')))
