@@ -77,16 +77,16 @@ class SeleniumMiddleware(object):
                 # Get item height
                 card = self.wait.until(
                     expected_conditions.presence_of_element_located(
-                        (By.CSS_SELECTOR, '.full-card.container.full-card')))
+                        (By.CSS_SELECTOR, '.full-card')))
                 height = card.size['height']
                 # Scroll page
                 scroll = ('var q=document.documentElement'
-                          '.scrollTop={};').format(height * 0.7)
+                          '.scrollTop={};').format(height * random())
                 self.driver.execute_script(scroll)
                 # Click comment button
                 comment = self.wait.until(
                     expected_conditions.element_to_be_clickable(
-                        (By.CSS_SELECTOR, '.comment.button.action-button')))
+                        (By.CSS_SELECTOR, '.comment')))
                 comment.click()
                 response = HtmlResponse(url=request.url,
                                         body=self.driver.page_source,

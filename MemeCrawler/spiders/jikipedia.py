@@ -78,7 +78,6 @@ class JikiSpider(scrapy.Spider):
             item['content'] = self.get_content(text)
             # Yield item
             if item['name'] != self.default_dict['name']:
-                logger.info('Entry {} has been fetched.'.format(item['name']))
                 yield item
             # Record name
             self.saved_dict[index] = item['name']
@@ -115,7 +114,7 @@ class JikiSpider(scrapy.Spider):
         self.current_index += 1
         # Return -1 if reach end of sequence
         if self.current_index < len(self.next_sequence):
-            next_id = self.next_sequence[self.current_index]
+            next_id = int(self.next_sequence[self.current_index])
         else:
             next_id = -1
         return next_id

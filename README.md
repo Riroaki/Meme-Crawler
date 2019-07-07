@@ -30,16 +30,24 @@
 
 执行`main.py`。
 
+各种配置（等待时间等）详见`settings.py`。
+
+在`logger.py`设置log层次。
+
 ## 运行截图
 
 正常情况下可以成功访问，并且在随机等待模拟阅读之后下滑页面：
 
 ![success](screenshots/success.png)
 
-如遇不测可能被导向验证码页面：
+如遇不测（等待时间较短时常会发生）可能被重定向至验证码页面：
 
 ![moss](screenshots/moss.png)
 
 如果多次被封，可能导致暂时无法访问，等待一段时间即可恢复：
 
 ![manual confirm](screenshots/manual confirm.png)
+
+## 目前的问题
+
+在某些情况下会停止访问，可以通过手动点击页面刷新解决。
