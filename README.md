@@ -49,7 +49,7 @@
 
 如果多次被封，可能导致暂时无法访问，等待一段时间即可恢复：
 
-![manual confirm](screenshots/manual confirm.png)
+![manual](screenshots/manual.png)
 
 保存的数据为`json`格式：
 
