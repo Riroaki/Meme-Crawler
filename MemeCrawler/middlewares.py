@@ -44,6 +44,7 @@ class SeleniumMiddleware(object):
         self.driver = driver
         self.wait = WebDriverWait(driver, timeout=TIMEOUT,
                                   poll_frequency=POLL_FREQUENCY)
+        self.like_rate = 0.4  # Possibility of clicking `like` button
         logger.info('Selenium driver is starting...')
 
     def __del__(self):
@@ -88,6 +89,13 @@ class SeleniumMiddleware(object):
                     expected_conditions.element_to_be_clickable(
                         (By.CSS_SELECTOR, '.comment')))
                 comment.click()
+                # Randomly click like button
+                if random() < self.like_rate:
+                    like = self.wait.until(
+                        expected_conditions.element_to_be_clickable(
+                            (By.CSS_SELECTOR, '.like.button')))
+                    like.click()
+                # Form response
                 response = HtmlResponse(url=request.url,
                                         body=self.driver.page_source,
                                         request=request,
