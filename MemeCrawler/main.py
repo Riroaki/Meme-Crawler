@@ -10,4 +10,4 @@ if __name__ == '__main__':
     # First run Jikipedia to fetch all data entries,
     # and save their names into JIKI_INDEX file.
     # Secondly run Bilibili and all other spiders.
-    execute(['scrapy', 'crawl', args[1]])
+    execute(['scrapy', 'crawl', args[1], '-L', 'INFO'])

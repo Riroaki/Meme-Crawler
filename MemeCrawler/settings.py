@@ -59,6 +59,11 @@ DOWNLOADER_MIDDLEWARES = {
     'MemeCrawler.middlewares.SeleniumMiddleware': 543
 }
 
+DOWNLOAD_TIMEOUT = 10
+RETRY_ENABLED = False
+RETRY_TIMES = 2
+RETRY_HTTP_CODES = [500]
+
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
 # EXTENSIONS = {
