@@ -1,8 +1,8 @@
 import scrapy
 
 
-class DefinitionItem(scrapy.Item):
-    """Definition of entry."""
+class JikiItem(scrapy.Item):
+    """Definition of a meme in jikipedia."""
     name = scrapy.Field()
     index = scrapy.Field()
     content = scrapy.Field()
@@ -13,3 +13,9 @@ class DefinitionItem(scrapy.Item):
     image_url = scrapy.Field()
     comment_count = scrapy.Field()
     tag_list = scrapy.Field()
+
+
+class BilibiliItem(scrapy.Item):
+    """Definition of a meme and related videos."""
+    name = scrapy.Field()
+    video_list = scrapy.Field()

@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from .settings import UA_LIST, DRIVER_PATH, TIMEOUT, POLL_FREQUENCY, \
-    RANDOM_SLEEP_BASE
+    RANDOM_SLEEP_LONG, RANDOM_SLEEP_SHORT
 from .logger import logger
 
 
@@ -38,7 +38,7 @@ class SeleniumMiddleware(object):
         driver = webdriver.Chrome(executable_path=DRIVER_PATH)
         # Set window size and position
         driver.set_window_position(0, 0)
-        driver.set_window_size(1400, 1000)
+        driver.set_window_size(700, 500)
         # Set timeout parameters
         driver.set_page_load_timeout(TIMEOUT)
         self.driver = driver
@@ -53,11 +53,22 @@ class SeleniumMiddleware(object):
 
     def process_request(self, request: scrapy.Request,
                         spider: scrapy.Spider) -> HtmlResponse:
-        _ = spider
+        _ = spider  # Use this to silent warning
+        # Process jiki requests
+        if 'jikipedia' in request.url:
+            response = self.process_jiki(request)
+        elif 'bilibili' in request.url:
+            response = self.process_bilibili(request)
+        else:  # Other sites are not supported
+            response = None
+        return response
+
+    def process_jiki(self, request: scrapy.Request) -> scrapy.http.HtmlResponse:
+        # Process jikipedia requests.
         try:
             self.driver.get(request.url)
             # Use random sleep
-            sleep(random() * RANDOM_SLEEP_BASE)
+            sleep(random() * RANDOM_SLEEP_LONG)
             # 404 not found
             if self.driver.page_source.count('这个页面找不到了') > 0:
                 response = HtmlResponse(url=request.url,
@@ -101,6 +112,7 @@ class SeleniumMiddleware(object):
                                         request=request,
                                         encoding='utf-8',
                                         status=200)
+        # Response status = 500, will be tried again
         except TimeoutException as e:
             logger.warning(e)
             response = HtmlResponse(url=request.url,
@@ -110,9 +122,35 @@ class SeleniumMiddleware(object):
             logger.warning(e)
             response = HtmlResponse(url=request.url,
                                     request=request,
-                                    status=404)
+                                    status=500)
         # Use random sleep after comments are shown
-        sleep(random() * RANDOM_SLEEP_BASE)
+        sleep(random() * RANDOM_SLEEP_LONG)
+        return response
+
+    def process_bilibili(self,
+                         request: scrapy.Request) -> scrapy.http.HtmlResponse:
+        # Process bilibili requests
+        try:
+            self.driver.get(request.url)
+            # Use random sleep
+            sleep(random() * RANDOM_SLEEP_SHORT)
+            # Scroll page
+            scroll = ('var q=document.documentElement'
+                      '.scrollTop={};').format(200 * random())
+            self.driver.execute_script(scroll)
+            # Use random sleep
+            sleep(random() * RANDOM_SLEEP_SHORT)
+            # Form response
+            response = HtmlResponse(url=request.url,
+                                    body=self.driver.page_source,
+                                    request=request,
+                                    encoding='utf-8',
+                                    status=200)
+        except TimeoutException as e:
+            logger.warning(e)
+            response = HtmlResponse(url=request.url,
+                                    request=request,
+                                    status=500)
         return response
 
     @classmethod

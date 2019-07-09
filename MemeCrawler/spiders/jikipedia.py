@@ -3,9 +3,9 @@ import re
 import pickle
 import scrapy
 import numpy as np
-from ..settings import ENTRY_INDEX_FILE
+from ..settings import JIKI_INDEX_FILE
 from ..logger import logger
-from ..items import DefinitionItem
+from ..items import JikiItem
 
 
 class JikiSpider(scrapy.Spider):
@@ -51,11 +51,12 @@ class JikiSpider(scrapy.Spider):
         self.init_index()
         # Get first index
         index = self.next_index()
-        if index > 0:
+        # Spawn requests iteratively
+        while index > 0:
             yield scrapy.Request(self.enytry_url.format(index=index),
                                  callback=self.parse, meta={'index': index})
-        else:
-            logger.log('All entries have been collected.')
+            index = self.next_index()
+        logger.info('All jiki entries have been collected.')
 
     def parse(self, response: scrapy.http.response) -> scrapy.Item:
         index = response.meta['index']
@@ -66,7 +67,7 @@ class JikiSpider(scrapy.Spider):
         # Can't be reached
         if status == 200:
             text = response.text
-            item = DefinitionItem()
+            item = JikiItem()
             # Parse items
             item['index'] = index
             for attr, pat in self.pat_dict.items():
@@ -81,21 +82,15 @@ class JikiSpider(scrapy.Spider):
                 yield item
             # Record name
             self.saved_dict[index] = item['name']
-        else:
+        elif status == 404:
             self.saved_dict[index] = 'error'
-        # Continue on requesting next entry
-        index = self.next_index()
-        if index > 0:
-            yield scrapy.Request(self.enytry_url.format(index=index),
-                                 callback=self.parse,
-                                 meta={'index': index})
-        else:
-            logger.log('All entries have been collected.')
+        else:  # status == 500, don't record
+            return
 
     def init_index(self) -> None:
         # Load from index file and shuffle index
-        if os.path.exists(ENTRY_INDEX_FILE):
-            with open(ENTRY_INDEX_FILE, 'rb') as f:
+        if os.path.exists(JIKI_INDEX_FILE):
+            with open(JIKI_INDEX_FILE, 'rb') as f:
                 saved: dict = pickle.load(f)
         else:
             saved = {}
@@ -138,6 +133,6 @@ class JikiSpider(scrapy.Spider):
 
     def close(self, spider, reason):
         # Dump save record before close spider
-        logger.warning(reason)
-        with open(ENTRY_INDEX_FILE, 'wb') as f:
+        logger.info(reason)
+        with open(JIKI_INDEX_FILE, 'wb') as f:
             pickle.dump(self.saved_dict, f)

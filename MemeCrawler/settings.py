@@ -42,7 +42,6 @@ DOWNLOAD_DELAY = 3.
 DEFAULT_REQUEST_HEADERS = {
     'User-Agent': ('Mozilla/5.0 (compatible; Googlebot/2.1;'
                    ' +http://www.google.com/bot.html)'),
-    'Token': '81dca7415bd81f859fcdc968afd19be1d9015f01126142bb907181bd3dbd0098',
     'Accept': 'application/json, text/plain, */*',
 }
 
@@ -94,13 +93,6 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-
-# Saved entry index
-ENTRY_INDEX_FILE = 'index'
-
-# Save directory
-DATA_DIR = 'data'
-
 # User-Agent to choose from
 UA_LIST = [
     # Google-bot headers
@@ -124,4 +116,13 @@ DRIVER_PATH = 'driver/chromedriver'
 # Time control for selenium (sec)
 TIMEOUT = 10
 POLL_FREQUENCY = 2
-RANDOM_SLEEP_BASE = 5
+RANDOM_SLEEP_LONG = 5
+RANDOM_SLEEP_SHORT = 2
+
+# Save directory
+JIKI_DIR = 'data/jikipedia'
+BILIBILI_DIR = 'data/bilibili'
+
+# Saved entry index files
+JIKI_INDEX_FILE = 'index/jiki_index'
+BILIBILI_INDEX_FILE = 'index/bilibili_index'

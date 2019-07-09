@@ -10,7 +10,7 @@
 
 在梗条目被爬取完毕后，根据梗的名字爬取以下内容：
 
-- [ ] [b站](https://bilibili.com)视频（av号，可以生成为外链播放器）
+- [x] [b站](https://bilibili.com)视频（av号，可以生成为外链播放器）
 - [ ] [微博](https://weibo.com)（文本内容）
 - [ ] [谷歌](http://google.com)图片（图片链接）
 
@@ -31,7 +31,13 @@
 
 ## 运行
 
-在`MemeCrawler`文件夹下，执行`scrapy crawl jiki`。
+在`MemeCrawler`文件夹下，执行`main.py`脚本进行爬取：
+
+```shell
+$ python main.py jiki
+$ python main.py bilibili
+$ python main.py weibo
+```
 
 各种配置（等待时间等）详见`settings.py`。
 
@@ -39,24 +45,30 @@
 
 ## 运行截图
 
+### Jikipedia——小鸡词典
+
 正常情况下成功访问后，并且在随机等待（模拟阅读过程）之后，进行下滑页面、随机点赞👍的操作：
 
-![success](screenshots/success.png)
+![success](screenshots/jikisuccess.png)
 
 如遇不测（间隔时间较短时常会发生）可能被重定向至验证码页面，默认情况下爬虫会等待验证码消失后退出：
 
-![moss](screenshots/moss.png)
+![moss](screenshots/jikimoss.png)
 
 如果多次被封，可能导致暂时无法访问，等待一段时间即可恢复：
 
-![manual](screenshots/manual.png)
+![manual](screenshots/jikimanual.png)
 
 保存的数据为`json`格式：
 
-![](screenshots/result.png)
+![](screenshots/jikiresult.png)
 
-## 目前的问题
+### Bilibili——B站
 
-在某些情况下会出现500错误并停止访问，可以通过手动点击页面刷新解决。
+<s>这个真不是我故意，一截就截到这个</s>
 
-目前暂不加入评论解析的工作。
+![](screenshots/bilibilisuccess.png)
+
+本地保存结果：
+
+![](screenshots/bilibiliresult.png)
