@@ -2,6 +2,7 @@ import os
 import re
 import pickle
 import scrapy
+import random
 from urllib.parse import quote
 from ..settings import WEIBO_INDEX_FILE, JIKI_INDEX_FILE
 from ..logger import logger
@@ -13,7 +14,7 @@ class WeiboSpider(scrapy.Spider):
 
     # Saved data
     saved_dict = {}
-    all_dict = {}
+    todo_list = []
 
     # Url format of weibo search
     enytry_url = 'https://s.weibo.com/weibo?q={key}&Refer=index'
@@ -49,7 +50,7 @@ class WeiboSpider(scrapy.Spider):
         # Init saved index and next index sequence
         self.init_index()
         # Iterates all key words
-        for keyword in self.next_keyword():
+        for keyword in self.todo_list:
             yield scrapy.Request(self.enytry_url.format(key=quote(keyword)),
                                  callback=self.parse, meta={'key': keyword})
         logger.info('All weibo data has been collected.')
@@ -81,12 +82,14 @@ class WeiboSpider(scrapy.Spider):
         if os.path.exists(JIKI_INDEX_FILE):
             with open(JIKI_INDEX_FILE, 'rb') as f:
                 all_dict = pickle.load(f)
-        self.all_dict = all_dict
-
-    def next_keyword(self) -> str:
-        for keyword in self.all_dict.values():
-            if keyword != 'error' and keyword not in self.saved_dict:
-                yield quote(keyword)
+        # Generate to-do list
+        todo = []
+        for k in all_dict.values():
+            if k != 'error' and k not in saved:
+                todo.append(k)
+        # Randomly start to aviod stuck
+        random.shuffle(todo)
+        self.todo_list = todo
 
     def get_weibo_list(self, raw: str) -> list:
         # Extract weibo information
