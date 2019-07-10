@@ -16,6 +16,25 @@ class JikiItem(scrapy.Item):
 
 
 class BilibiliItem(scrapy.Item):
-    """Definition of a meme and related videos."""
+    """A meme's related videos."""
     name = scrapy.Field()
     video_list = scrapy.Field()
+
+
+class WeiboItem(scrapy.Item):
+    """A meme's related weibos."""
+    name = scrapy.Field()
+    weibo_list = scrapy.Field()
+
+
+class WeiboSingleItem(scrapy.Item):
+    """Information about a piece of weibo."""
+    mid = scrapy.Field()
+    user = scrapy.Field()
+    avator = scrapy.Field()
+    content = scrapy.Field()
+    time = scrapy.Field()
+    like = scrapy.Field()
+    repost = scrapy.Field()
+    comment = scrapy.Field()
+    source = scrapy.Field()

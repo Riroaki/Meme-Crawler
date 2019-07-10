@@ -1,8 +1,8 @@
 import os
 import json
-from .settings import JIKI_DIR, BILIBILI_DIR
+from .settings import JIKI_DIR, BILIBILI_DIR, WEIBO_DIR
 from .logger import logger
-from .items import JikiItem, BilibiliItem
+from .items import JikiItem, BilibiliItem, WeiboItem
 
 
 class MemecrawlerPipeline(object):
@@ -12,7 +12,8 @@ class MemecrawlerPipeline(object):
     def process_item(cls, item, _):
         # Register items with corresponding process methods
         handlers = {JikiItem: cls.process_jiki,
-                    BilibiliItem: cls.process_bilibili}
+                    BilibiliItem: cls.process_bilibili,
+                    WeiboItem: cls.process_weibo}
         item_type = type(item)
         # Process items
         if item_type in handlers:
@@ -41,3 +42,15 @@ class MemecrawlerPipeline(object):
             json.dump(dict(item), f, ensure_ascii=False,
                       separators=(',', ':'), indent=4)
         logger.info('Bilibili videos about {} has been fetched.'.format(name))
+
+    @staticmethod
+    def process_weibo(item: WeiboItem) -> None:
+        name = item['name']
+        item['weibo_list'] = [dict(weibo) for weibo in item['weibo_list']]
+        if not os.path.exists(WEIBO_DIR):
+            os.mkdir(WEIBO_DIR)
+        filename = os.path.join(WEIBO_DIR, '{}.txt'.format(name))
+        with open(filename, 'w') as f:
+            json.dump(dict(item), f, ensure_ascii=False,
+                      separators=(',', ':'), indent=4)
+        logger.info('Weibo items about {} has been fetched.'.format(name))

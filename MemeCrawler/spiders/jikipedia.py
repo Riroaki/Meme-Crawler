@@ -10,7 +10,6 @@ from ..items import JikiItem
 
 class JikiSpider(scrapy.Spider):
     name = 'jiki'
-    allowed_domains = ['jikipedia.com']
 
     # Saved data
     saved_dict = {}
@@ -37,10 +36,10 @@ class JikiSpider(scrapy.Spider):
         'name': 'noname',
         'time': '0000-00-00',
         'image_url': '',
-        'view': 0,
-        'like': 0,
-        'dislike': 0,
-        'comment_count': 0
+        'view': '0',
+        'like': '0',
+        'dislike': '0',
+        'comment_count': '0'
     }
 
     # Handle bad http status
@@ -56,14 +55,13 @@ class JikiSpider(scrapy.Spider):
             yield scrapy.Request(self.enytry_url.format(index=index),
                                  callback=self.parse, meta={'index': index})
             index = self.next_index()
-        logger.info('All jiki entries have been collected.')
 
     def parse(self, response: scrapy.http.response) -> scrapy.Item:
         index = response.meta['index']
         status = response.status
         # Check if ip has been banned: redirected to moss CAPTCHA
         if response.text.find('hello moss') >= 0:
-            self.crawler.engine.close_spider(self, 'IP banned')
+            self.crawler.engine.close_spider(self, 'IP banned.')
         # Can't be reached
         if status == 200:
             text = response.text
@@ -77,15 +75,15 @@ class JikiSpider(scrapy.Spider):
                     item[attr] = self.default_dict[attr]
             item['tag_list'] = self.get_tag_list(text)
             item['content'] = self.get_content(text)
+            # Record name
+            self.saved_dict[index] = item['name']
             # Yield item
             if item['name'] != self.default_dict['name']:
                 yield item
-            # Record name
-            self.saved_dict[index] = item['name']
         elif status == 404:
             self.saved_dict[index] = 'error'
-        else:  # status == 500, don't record
-            return
+        else:  # status == 500
+            self.crawler.engine.close_spider(self, 'Connection failed.')
 
     def init_index(self) -> None:
         # Load from index file and shuffle index

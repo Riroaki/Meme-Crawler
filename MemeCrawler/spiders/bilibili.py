@@ -9,13 +9,12 @@ from ..items import BilibiliItem
 
 class BilibiliSpider(scrapy.Spider):
     name = 'bilibili'
-    allowed_domains = ['api.bilibili.cn']
 
     # Saved data
     saved_dict = {}
     all_dict = {}
 
-    # Url format of Bilibili's search api
+    # Url format of Bilibili's search
     enytry_url = 'https://search.bilibili.com/all?keyword={keyword}'
 
     # Handle bad http status
@@ -28,7 +27,6 @@ class BilibiliSpider(scrapy.Spider):
         for keyword in self.next_keyword():
             yield scrapy.Request(self.enytry_url.format(keyword=keyword),
                                  callback=self.parse, meta={'key': keyword})
-        logger.info('All bilibili videos have been collected.')
 
     def parse(self, response: scrapy.http.response) -> scrapy.Item:
         keyword = response.meta['key']
@@ -45,7 +43,7 @@ class BilibiliSpider(scrapy.Spider):
         elif status == 404:
             self.saved_dict[keyword] = 'error'
         else:  # status == 500
-            return
+            self.crawler.engine.close_spider(self, 'Connection failed.')
 
     def init_index(self) -> None:
         saved = {}

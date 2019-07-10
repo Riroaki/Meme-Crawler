@@ -21,12 +21,12 @@ NEWSPIDER_MODULE = 'MemeCrawler.spiders'
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 8
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3.
+DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -58,11 +58,6 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     'MemeCrawler.middlewares.SeleniumMiddleware': 543
 }
-
-DOWNLOAD_TIMEOUT = 10
-RETRY_ENABLED = False
-RETRY_TIMES = 2
-RETRY_HTTP_CODES = [500]
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
@@ -118,8 +113,12 @@ UA_LIST = [
 # Driver path
 DRIVER_PATH = 'driver/chromedriver'
 
-# Time control for selenium (sec)
-TIMEOUT = 10
+# Download control
+DOWNLOAD_TIMEOUT = 10
+RETRY_ENABLED = False
+RETRY_TIMES = 1
+
+# Selenium parameters
 POLL_FREQUENCY = 2
 RANDOM_SLEEP_LONG = 5
 RANDOM_SLEEP_SHORT = 2
@@ -127,7 +126,9 @@ RANDOM_SLEEP_SHORT = 2
 # Save directory
 JIKI_DIR = 'data/jikipedia'
 BILIBILI_DIR = 'data/bilibili'
+WEIBO_DIR = 'data/weibo'
 
 # Saved entry index files
 JIKI_INDEX_FILE = 'index/jiki_index'
 BILIBILI_INDEX_FILE = 'index/bilibili_index'
+WEIBO_INDEX_FILE = 'index/weibo_index'
