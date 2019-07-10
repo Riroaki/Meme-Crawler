@@ -2,6 +2,7 @@ import os
 import re
 import pickle
 import scrapy
+from urllib.parse import quote
 from ..settings import BILIBILI_INDEX_FILE, JIKI_INDEX_FILE
 from ..logger import logger
 from ..items import BilibiliItem
@@ -14,8 +15,8 @@ class BilibiliSpider(scrapy.Spider):
     saved_dict = {}
     all_dict = {}
 
-    # Url format of Bilibili's search
-    enytry_url = 'https://search.bilibili.com/all?keyword={keyword}'
+    # Url format of Bilibili search
+    enytry_url = 'https://search.bilibili.com/all?keyword={key}'
 
     # Handle bad http status
     handle_httpstatus_list = [404, 500]
@@ -25,7 +26,7 @@ class BilibiliSpider(scrapy.Spider):
         self.init_index()
         # Iterates all key words
         for keyword in self.next_keyword():
-            yield scrapy.Request(self.enytry_url.format(keyword=keyword),
+            yield scrapy.Request(self.enytry_url.format(key=quote(keyword)),
                                  callback=self.parse, meta={'key': keyword})
 
     def parse(self, response: scrapy.http.response) -> scrapy.Item:

@@ -2,6 +2,7 @@ import os
 import re
 import pickle
 import scrapy
+from urllib.parse import quote
 from ..settings import WEIBO_INDEX_FILE, JIKI_INDEX_FILE
 from ..logger import logger
 from ..items import WeiboItem, WeiboSingleItem
@@ -14,8 +15,8 @@ class WeiboSpider(scrapy.Spider):
     saved_dict = {}
     all_dict = {}
 
-    # Url format of Bilibili's search api
-    enytry_url = 'https://s.weibo.com/weibo?q={keyword}&Refer=SWeibo_box'
+    # Url format of weibo search
+    enytry_url = 'https://s.weibo.com/weibo?q={key}&Refer=index'
 
     # Patterns
     pat_dict = {
@@ -49,7 +50,7 @@ class WeiboSpider(scrapy.Spider):
         self.init_index()
         # Iterates all key words
         for keyword in self.next_keyword():
-            yield scrapy.Request(self.enytry_url.format(keyword=keyword),
+            yield scrapy.Request(self.enytry_url.format(key=quote(keyword)),
                                  callback=self.parse, meta={'key': keyword})
         logger.info('All weibo data has been collected.')
 
@@ -85,7 +86,7 @@ class WeiboSpider(scrapy.Spider):
     def next_keyword(self) -> str:
         for keyword in self.all_dict.values():
             if keyword != 'error' and keyword not in self.saved_dict:
-                yield keyword
+                yield quote(keyword)
 
     def get_weibo_list(self, raw: str) -> list:
         # Extract weibo information
