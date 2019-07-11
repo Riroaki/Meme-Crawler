@@ -159,8 +159,10 @@ RANDOM_SLEEP_SHORT = 2
 JIKI_DIR = 'data/jikipedia'
 BILIBILI_DIR = 'data/bilibili'
 WEIBO_DIR = 'data/weibo'
+GOOGLE_IMAGE_DIR = 'data/google_image'
 
 # Saved entry index files
 JIKI_INDEX_FILE = 'index/jiki_index'
 BILIBILI_INDEX_FILE = 'index/bilibili_index'
 WEIBO_INDEX_FILE = 'index/weibo_index'
+GOOGLE_IMAGE_INDEX_FILE = 'index/google_image_index'
