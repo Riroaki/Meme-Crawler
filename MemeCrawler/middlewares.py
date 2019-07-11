@@ -38,7 +38,7 @@ class SeleniumMiddleware(object):
         driver = webdriver.Chrome(executable_path=DRIVER_PATH)
         # Set window size and position
         driver.set_window_position(100 * random(), 100 * random())
-        driver.set_window_size(1000, 800)
+        driver.set_window_size(250, 150)
         # Set timeout parameters
         driver.set_page_load_timeout(DOWNLOAD_TIMEOUT)
         self.driver = driver
@@ -130,6 +130,10 @@ class SeleniumMiddleware(object):
             self.driver.get(request.url)
             # Use random sleep
             sleep(random() * RANDOM_SLEEP_SHORT)
+            # Check weibo redirecting...
+            if 'weibo' in request.url and self.driver.page_source.count(
+                    'layer_login_register_v2') > 0:
+                raise TimeoutException
             # Scroll page
             scroll = ('var q=document.documentElement'
                       '.scrollTop={};').format(1000 * random())
