@@ -12,23 +12,29 @@
 
 - [x] [b站](https://bilibili.com)视频（av号，可以生成为外链播放器）
 - [x] [微博](https://weibo.com)（文本内容）
+- [x] [谷歌](https://google.com)图片内容（需要翻墙）
 
 主要基于`Scrapy`实现，经过测试发现小鸡百科等网站对爬虫的封锁较严，故加入`Selenium`作为中间件进行网页访问，然而目前还是存在ip被封的可能……务必谨慎驾驶。
+
+谷歌图片爬虫基于一个现成的python库`Google Images Download`完成。
 
 ## 要求
 
 ### Python环境
 
 - python==3.6.8
-- Scrapy==1.5.1
-- Selenium==3.141.0
+- scrapy==1.5.1
+- selenium==3.141.0
 - numpy==1.15.4
+- google-images-download==2.8.0
 
 ### 驱动
 
 请在`driver`文件夹下放置`chromedriver`驱动。
 
 ## 运行
+
+### 普通爬虫
 
 在`MemeCrawler`文件夹下，执行`run.sh`脚本进行爬取：
 
@@ -39,6 +45,18 @@ $ ./run.sh [name] [time]
 ```
 
 各种配置（等待时间等）详见`settings.py`。
+
+### 谷歌图片爬虫
+
+在`MemeCrawler`文件夹下，执行`google.py`脚本进行爬取：
+
+```shell
+$ python google.py
+```
+
+### 注意
+
+微博爬虫、B站爬虫、谷歌爬虫三者，均需在小鸡百科爬虫执行后才能爬取（因为是根据小鸡百科的条目进行爬取）。
 
 ## 运行截图
 
@@ -86,3 +104,12 @@ $ ./run.sh [name] [time]
 
 微博总是给我500响应，估计是限流操作。
 
+### Google image——谷歌图片
+
+人家的工具就是稳，没得说。**不过需要打开全局代理运行**。
+
+![](screenshots/googlesuccess.png)
+
+图片：默认每一个词条爬取20张，并且放在子文件夹下。
+
+![](screenshots/googledata.png)
