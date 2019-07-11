@@ -35,6 +35,7 @@ class MemecrawlerPipeline(object):
     @staticmethod
     def process_bilibili(item: BilibiliItem) -> None:
         name = item['name']
+        item['video_list'] = [dict(video) for video in item['video_list']]
         if not os.path.exists(BILIBILI_DIR):
             os.mkdir(BILIBILI_DIR)
         filename = os.path.join(BILIBILI_DIR, '{}.txt'.format(name))

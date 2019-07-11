@@ -6,7 +6,7 @@ import random
 from urllib.parse import quote
 from ..settings import BILIBILI_INDEX_FILE, JIKI_INDEX_FILE
 from ..logger import logger
-from ..items import BilibiliItem
+from ..items import BilibiliItem, BilibiliSingleItem
 
 
 class BilibiliSpider(scrapy.Spider):
@@ -16,8 +16,33 @@ class BilibiliSpider(scrapy.Spider):
     saved_dict = {}
     todo_list = []
 
+    # Max limit of videos for one keyword
+    limit = 20
+
     # Url format of Bilibili search
     enytry_url = 'https://search.bilibili.com/all?keyword={key}'
+
+    # Patterns
+    pat_dict = {
+        'video_id': 'a href="//www.bilibili.com/video/av(.*?)\?',
+        'title': '<a title="(.*?)" href',
+        'watch': '<i class="icon-playtime"></i>\n(.*?)\n',
+        'subtitle': '<i class="icon-subtitle"></i>\n(.*?)\n',
+        'time': '<i class="icon-date"></i>\n(.*?)\n',
+        'up': 'class="up-name">(.*?)<',
+        'description': '<div class="des hide">\n([\s\S]*?)\n      <'
+    }
+
+    # Default values
+    default_dict = {
+        'video_id': '-1',
+        'title': '',
+        'watch': '0',
+        'subtitle': '0',
+        'time': '0000-00-00',
+        'up': '',
+        'description': ''
+    }
 
     # Handle bad http status
     handle_httpstatus_list = [404, 500]
@@ -66,13 +91,21 @@ class BilibiliSpider(scrapy.Spider):
         random.shuffle(todo)
         self.todo_list = todo
 
-    @staticmethod
-    def get_video_list(raw: str) -> list:
+    def get_video_list(self, raw: str) -> list:
         # Extract video ids
-        pat = 'a href="//www.bilibili.com/video/av(.*?)\?'
         video_list = []
-        for video_id in re.findall(pat, raw):
-            video_list.append(video_id)
+        values, count = {}, 0
+        for attr, pat in self.pat_dict.items():
+            values[attr] = re.findall(pat, raw)
+            count = min(max(count, len(values[attr])), self.limit)
+        for i in range(count):
+            video = BilibiliSingleItem()
+            for attr in values.keys():
+                try:
+                    video[attr] = values[attr][i].strip()
+                except AttributeError or IndexError:
+                    video[attr] = self.default_dict[attr]
+            video_list.append(video)
         return video_list
 
     def close(self, spider, reason):

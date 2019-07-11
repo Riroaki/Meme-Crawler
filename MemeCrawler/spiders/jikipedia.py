@@ -13,8 +13,7 @@ class JikiSpider(scrapy.Spider):
 
     # Saved data
     saved_dict = {}
-    next_sequence = {}
-    current_index = -1
+    todo_list = []
 
     # Url format of Jikipedia
     enytry_url = 'https://jikipedia.com/definition/{index}'
@@ -48,13 +47,10 @@ class JikiSpider(scrapy.Spider):
     def start_requests(self) -> scrapy.Request:
         # Init saved index and next index sequence
         self.init_index()
-        # Get first index
-        index = self.next_index()
-        # Spawn requests iteratively
-        while index > 0:
+        # Iterates all indices
+        for index in self.todo_list:
             yield scrapy.Request(self.enytry_url.format(index=index),
                                  callback=self.parse, meta={'index': index})
-            index = self.next_index()
 
     def parse(self, response: scrapy.http.response) -> scrapy.Item:
         index = response.meta['index']
@@ -95,22 +91,11 @@ class JikiSpider(scrapy.Spider):
         # Get unsaved index
         all_index = np.ones(self.max_index + 1)
         all_index[list(saved.keys())] = 0
-        rest_index = np.where(all_index > 0)[0]
+        todo = np.where(all_index > 0)[0]
         # Shuffle index
-        np.random.shuffle(rest_index)
-        self.next_sequence = rest_index
+        np.random.shuffle(todo)
+        self.todo_list = todo
         self.saved_dict = saved
-        self.current_index = -1
-
-    def next_index(self) -> int:
-        # Find index of next entry that is not saved
-        self.current_index += 1
-        # Return -1 if reach end of sequence
-        if self.current_index < len(self.next_sequence):
-            next_id = int(self.next_sequence[self.current_index])
-        else:
-            next_id = -1
-        return next_id
 
     @staticmethod
     def get_content(raw: str) -> str:

@@ -11,8 +11,7 @@
 在梗条目被爬取完毕后，根据梗的名字爬取以下内容：
 
 - [x] [b站](https://bilibili.com)视频（av号，可以生成为外链播放器）
-- [ ] [微博](https://weibo.com)（文本内容）
-- [ ] [谷歌](http://google.com)图片（图片链接）
+- [x] [微博](https://weibo.com)（文本内容）
 
 主要基于`Scrapy`实现，经过测试发现小鸡百科等网站对爬虫的封锁较严，故加入`Selenium`作为中间件进行网页访问，然而目前还是存在ip被封的可能……务必谨慎驾驶。
 
@@ -31,17 +30,15 @@
 
 ## 运行
 
-在`MemeCrawler`文件夹下，执行`main.py`脚本进行爬取：
+在`MemeCrawler`文件夹下，执行`run.sh`脚本进行爬取：
 
 ```shell
-$ python main.py jiki
-$ python main.py bilibili
-$ python main.py weibo
+$ ./run.sh [name] [time]
+# name = ['jiki', 'webo', 'bilibili']
+# time = frequency of checking process, int value, default = 4
 ```
 
 各种配置（等待时间等）详见`settings.py`。
-
-在`logger.py`设置log层次。
 
 ## 运行截图
 
@@ -61,14 +58,31 @@ $ python main.py weibo
 
 保存的数据为`json`格式：
 
-![](screenshots/jikiresult.png)
+![](screenshots/jikidata.png)
 
 ### Bilibili——B站
 
-<s>这个真不是我故意，一截就截到这个</s>
+爬取梗相关的第一页视频搜索结果。
+
+<s>这个图真不是我有意截的，一截就截到这个</s>
 
 ![](screenshots/bilibilisuccess.png)
 
 本地保存结果：
 
-![](screenshots/bilibiliresult.png)
+![](screenshots/bilibilidata.png)
+
+顺便一提，B站好像不会封我，真是良心哈哈
+
+### Weibo——微博
+
+爬取梗相关的微博第一页内容。
+
+![](screenshots/weibosuccess.png)
+
+微博数据格式比较复杂，所以先保留html格式的内容……等待进一步处理。
+
+![](screenshots/weibodata.png)
+
+微博总是给我500响应，估计是限流操作。
+

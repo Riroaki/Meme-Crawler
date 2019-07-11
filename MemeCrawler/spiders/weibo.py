@@ -16,6 +16,9 @@ class WeiboSpider(scrapy.Spider):
     saved_dict = {}
     todo_list = []
 
+    # Max limit of weibo count for one keyword
+    limit = 20
+
     # Url format of weibo search
     enytry_url = 'https://s.weibo.com/weibo?q={key}&Refer=index'
 
@@ -24,6 +27,7 @@ class WeiboSpider(scrapy.Spider):
         'mid': 'mid=(.*?)&',
         'user': 'user_name">(.*?)<',
         'avator': 'user_pic"><img src="(.*?)"',
+        'content': '<!--微博内容-->([\s\S]*?)<!--\/微博内容',
         'time': 'click:wb_time">([\s\S]*?)<',
         'like': '<em>([0-9]*)<',
         'repost': 'click:repost.*?>.*?([0-9]*)<',
@@ -36,6 +40,7 @@ class WeiboSpider(scrapy.Spider):
         'mid': '',
         'user': '',
         'avator': '',
+        'content': '',
         'time': '0000-00-00',
         'like': '0',
         'repost': '0',
@@ -93,33 +98,20 @@ class WeiboSpider(scrapy.Spider):
 
     def get_weibo_list(self, raw: str) -> list:
         # Extract weibo information
-        start = '<!--card-wrap-->'
-        end = '<!--/card-wrap-->'
-        item_list = []
-        while start in raw:
-            raw = raw[raw.find(start) + len(start):]
-            piece = raw[:raw.find(end)]
-            raw = raw[raw.find(end) + len(end):]
+        weibo_list = []
+        values, count = {}, 0
+        for attr, pat in self.pat_dict.items():
+            values[attr] = re.findall(pat, raw)
+            count = min(max(count, len(values[attr])), self.limit)
+        for i in range(count):
             item = WeiboSingleItem()
-            for attr, pat in self.pat_dict.items():
+            for attr in values.keys():
                 try:
-                    item[attr] = re.search(pat, piece).group(1)
-                except AttributeError:
+                    item[attr] = values[attr][i]
+                except AttributeError or IndexError:
                     item[attr] = self.default_dict[attr]
-            item['content'] = self.get_weibo_content(piece)
-            item_list.append(item)
-        return item_list
-
-    @staticmethod
-    def get_weibo_content(piece: str) -> str:
-        # Extract contents of weibo
-        pat = '<!--微博内容-->([\s\S]*?)<!--\/微博内容'
-        try:
-            content = re.search(pat, piece).group(1).strip()
-            content = re.sub('<.*?>', '', content)
-        except AttributeError:
-            content = ''
-        return content
+            weibo_list.append(item)
+        return weibo_list
 
     def close(self, spider, reason):
         logger.info(reason)

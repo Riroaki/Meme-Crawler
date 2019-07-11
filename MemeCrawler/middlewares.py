@@ -135,7 +135,7 @@ class SeleniumMiddleware(object):
                       '.scrollTop={};').format(1000 * random())
             self.driver.execute_script(scroll)
             # Use random sleep
-            sleep(random() * RANDOM_SLEEP_LONG)
+            sleep(random() * RANDOM_SLEEP_SHORT)
             # Form response
             response = HtmlResponse(url=request.url,
                                     body=self.driver.page_source,

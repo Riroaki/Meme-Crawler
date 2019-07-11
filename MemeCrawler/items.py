@@ -21,6 +21,17 @@ class BilibiliItem(scrapy.Item):
     video_list = scrapy.Field()
 
 
+class BilibiliSingleItem(scrapy.Item):
+    """Information about a video in bilibili."""
+    video_id = scrapy.Field()
+    title = scrapy.Field()
+    watch = scrapy.Field()
+    subtitle = scrapy.Field()
+    time = scrapy.Field()
+    up = scrapy.Field()
+    description = scrapy.Field()
+
+
 class WeiboItem(scrapy.Item):
     """A meme's related weibos."""
     name = scrapy.Field()
