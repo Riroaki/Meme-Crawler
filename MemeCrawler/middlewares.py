@@ -8,9 +8,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from .settings import UA_LIST, DRIVER_PATH, DOWNLOAD_TIMEOUT, POLL_FREQUENCY, \
-    RANDOM_SLEEP_LONG, RANDOM_SLEEP_SHORT, SHOW_WINDOW
-from .logger import logger
+from MemeCrawler.settings import UA_LIST, DRIVER_PATH, DOWNLOAD_TIMEOUT, \
+    POLL_FREQUENCY, RANDOM_SLEEP_LONG, RANDOM_SLEEP_SHORT, SHOW_WINDOW
+from MemeCrawler.logger import logger
 
 
 class RandomUserAgentMiddlware(object):

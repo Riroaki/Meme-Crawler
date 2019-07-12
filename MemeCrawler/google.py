@@ -1,8 +1,9 @@
 import os
 import pickle
 import random
-from settings import GOOGLE_IMAGE_DIR, GOOGLE_IMAGE_INDEX_FILE, JIKI_INDEX_FILE
-from logger import logger
+from MemeCrawler.settings import GOOGLE_IMAGE_DIR, GOOGLE_IMAGE_INDEX_FILE, \
+    JIKI_INDEX_FILE
+from MemeCrawler.logger import logger
 
 
 class GoogleSpider(object):
@@ -21,7 +22,7 @@ class GoogleSpider(object):
         # Generate to-do list
         todo = []
         for k in all_dict.values():
-            if k != 'error' and k not in saved:
+            if k not in {'error', 'noname'} and k not in saved:
                 todo.append(k)
         # Randomly start to aviod stuck
         random.shuffle(todo)

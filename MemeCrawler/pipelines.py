@@ -1,8 +1,8 @@
 import os
 import json
-from .settings import JIKI_DIR, BILIBILI_DIR, WEIBO_DIR
-from .logger import logger
-from .items import JikiItem, BilibiliItem, WeiboItem
+from MemeCrawler.settings import JIKI_DIR, BILIBILI_DIR, WEIBO_DIR
+from MemeCrawler.logger import logger
+from MemeCrawler.items import JikiItem, BilibiliItem, WeiboItem
 
 
 class MemecrawlerPipeline(object):

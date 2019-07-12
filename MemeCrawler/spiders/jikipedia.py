@@ -3,9 +3,9 @@ import re
 import pickle
 import scrapy
 import numpy as np
-from ..settings import JIKI_INDEX_FILE
-from ..logger import logger
-from ..items import JikiItem
+from MemeCrawler.settings import JIKI_INDEX_FILE
+from MemeCrawler.logger import logger
+from MemeCrawler.items import JikiItem
 
 
 class JikiSpider(scrapy.Spider):
@@ -17,7 +17,7 @@ class JikiSpider(scrapy.Spider):
 
     # Url format of Jikipedia
     enytry_url = 'https://jikipedia.com/definition/{index}'
-    max_index = 10000
+    max_index = 20000
 
     # Patterns
     pat_dict = {
@@ -49,6 +49,8 @@ class JikiSpider(scrapy.Spider):
         self.init_index()
         # Iterates all indices
         for index in self.todo_list:
+            # Transform int64 to int so that it could be jsonfied
+            index = int(index)
             yield scrapy.Request(self.enytry_url.format(index=index),
                                  callback=self.parse, meta={'index': index})
 

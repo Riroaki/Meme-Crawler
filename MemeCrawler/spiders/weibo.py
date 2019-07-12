@@ -4,9 +4,9 @@ import pickle
 import scrapy
 import random
 from urllib.parse import quote
-from ..settings import WEIBO_INDEX_FILE, JIKI_INDEX_FILE
-from ..logger import logger
-from ..items import WeiboItem, WeiboSingleItem
+from MemeCrawler.settings import WEIBO_INDEX_FILE, JIKI_INDEX_FILE
+from MemeCrawler.logger import logger
+from MemeCrawler.items import WeiboItem, WeiboSingleItem
 
 
 class WeiboSpider(scrapy.Spider):
@@ -90,7 +90,7 @@ class WeiboSpider(scrapy.Spider):
         # Generate to-do list
         todo = []
         for k in all_dict.values():
-            if k != 'error' and k not in saved:
+            if k not in {'error', 'noname'} and k not in saved:
                 todo.append(k)
         # Randomly start to aviod stuck
         random.shuffle(todo)
