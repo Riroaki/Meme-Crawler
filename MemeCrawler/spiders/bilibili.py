@@ -103,7 +103,7 @@ class BilibiliSpider(scrapy.Spider):
             for attr in values.keys():
                 try:
                     video[attr] = values[attr][i].strip()
-                except AttributeError or IndexError:
+                except (AttributeError, IndexError):
                     video[attr] = self.default_dict[attr]
             video_list.append(video)
         return video_list

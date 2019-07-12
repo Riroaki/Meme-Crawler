@@ -3,12 +3,13 @@ from time import sleep
 import scrapy
 from scrapy.http import HtmlResponse
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from .settings import UA_LIST, DRIVER_PATH, DOWNLOAD_TIMEOUT, POLL_FREQUENCY, \
-    RANDOM_SLEEP_LONG, RANDOM_SLEEP_SHORT
+    RANDOM_SLEEP_LONG, RANDOM_SLEEP_SHORT, SHOW_WINDOW
 from .logger import logger
 
 
@@ -35,7 +36,12 @@ class SeleniumMiddleware(object):
     """Middleware of browsing pages by selenium."""
 
     def __init__(self):
-        driver = webdriver.Chrome(executable_path=DRIVER_PATH)
+        options = Options()
+        # Set window invisible
+        if not SHOW_WINDOW:
+            options.add_argument('--headless')
+        driver = webdriver.Chrome(executable_path=DRIVER_PATH,
+                                  chrome_options=options)
         # Set window size and position
         driver.set_window_position(100 * random(), 100 * random())
         driver.set_window_size(250, 150)

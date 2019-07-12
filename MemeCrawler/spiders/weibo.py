@@ -108,7 +108,7 @@ class WeiboSpider(scrapy.Spider):
             for attr in values.keys():
                 try:
                     item[attr] = values[attr][i]
-                except AttributeError or IndexError:
+                except (AttributeError, IndexError):
                     item[attr] = self.default_dict[attr]
             weibo_list.append(item)
         return weibo_list
