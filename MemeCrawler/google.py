@@ -1,9 +1,9 @@
 import os
 import pickle
 import random
-from MemeCrawler.settings import GOOGLE_IMAGE_DIR, GOOGLE_IMAGE_INDEX_FILE, \
+from settings import GOOGLE_IMAGE_DIR, GOOGLE_IMAGE_INDEX_FILE, \
     JIKI_INDEX_FILE
-from MemeCrawler.logger import logger
+from logger import logger
 
 
 class GoogleSpider(object):
