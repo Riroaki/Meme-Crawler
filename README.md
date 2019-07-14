@@ -14,7 +14,7 @@
 - [x] [微博](https://weibo.com)（文本内容）
 - [x] [谷歌](https://google.com)图片内容（需要翻墙）
 
-爬取一定数量后，执行脚本合并数据，把每一个梗的数据保存到指定的文件夹。
+爬取一定数量后，执行脚本合并数据，把每一个梗的数据保存到指定的文件夹，并对每一个词条词云关键词词云。
 
 主要基于`Scrapy`实现，经过测试发现小鸡百科等网站对爬虫的封锁较严，故加入`Selenium`作为中间件进行网页访问，然而目前还是存在ip被封的可能……务必谨慎驾驶。
 
@@ -29,10 +29,20 @@
 - selenium==3.141.0
 - numpy==1.15.4
 - google-images-download==2.8.0
+- jieba==0.39
+- tqdm==4.32.2
+- wordcloud==1.5.0
 
 ### 驱动
 
 请在`driver`文件夹下放置`chromedriver`驱动。
+
+### 分词、词云相关
+
+- 在`stopwords`文件夹下放置中文停词文件`stopwords.txt`。
+- 在`fonts`文件夹下放置字体文件。
+
+默认文件已经放置，如果需要修改请在`MemeCrawler/merge.py`中修改。
 
 ## 运行
 
@@ -128,6 +138,10 @@ $ python merge.py
 
 ### 合并数据
 
+⚠️注意：这个过程运行由于词云需要分词，所以会比较慢，可以自行修改`merge.py`中代码取消生成（别问为啥不做成可配置的，我懒的改了= =）
+
+![](screenshots/merge.png)
+
 合并后数据格式：
 
 ```json
@@ -169,3 +183,7 @@ $ python merge.py
     ]
   }
 ```
+
+词云图片示例：【Github】
+
+![](screenshots/GitHub.png)

@@ -2,14 +2,21 @@ import os
 import re
 import json
 import pickle
-import numpy as np
 import logging
-from MemeCrawler.settings import BILIBILI_DIR, JIKI_DIR, WEIBO_DIR, \
-    GOOGLE_IMAGE_DIR
+import tqdm
+import jieba
+import numpy as np
+from wordcloud import WordCloud
+from settings import BILIBILI_DIR, JIKI_DIR, WEIBO_DIR, GOOGLE_IMAGE_DIR
 
 MERGE_DIR = 'data/merged'
+# Optional: generate word cloud pictures
+CLOUD_DIR = 'data/wordcloud'
 MERGE_INEDX_FILE = 'index/merged_index'
+FONT_PATH = 'fonts/HanyiSentyCrayon-2.ttf'
+STOP_WORDS_FILE = 'stopwords/stopwords.txt'
 logging.basicConfig(level=logging.INFO)
+jieba.setLogLevel(logging.INFO)
 
 
 def txt_filter(fname: str) -> bool:
@@ -30,21 +37,8 @@ def img_filter(fname: str) -> bool:
     return is_img
 
 
-jiki_list = set(filter(txt_filter, os.listdir(JIKI_DIR)))
-bilibili_list = set(filter(txt_filter, os.listdir(BILIBILI_DIR)))
-weibo_list = set(filter(txt_filter, os.listdir(WEIBO_DIR)))
-google_list = set(filter(dir_filter, os.listdir(GOOGLE_IMAGE_DIR)))
-
-
-def can_merge(entry: str) -> bool:
-    in_bilibili = entry + '.txt' in bilibili_list
-    in_weibo = entry + '.txt' in weibo_list
-    in_google = entry in google_list
-    all_in = in_bilibili and in_weibo and in_google
-    return all_in
-
-
 def ensure_data(data: dict) -> dict:
+    # Reformat data
     def process_value(raw) -> int:
         if isinstance(raw, int):
             return raw
@@ -91,6 +85,38 @@ def ensure_data(data: dict) -> dict:
     return res
 
 
+# Load file list
+jiki_list = set(filter(txt_filter, os.listdir(JIKI_DIR)))
+bilibili_list = set(filter(txt_filter, os.listdir(BILIBILI_DIR)))
+weibo_list = set(filter(txt_filter, os.listdir(WEIBO_DIR)))
+google_list = set(filter(dir_filter, os.listdir(GOOGLE_IMAGE_DIR)))
+# Load stop words dictionary
+stopwords_set = set(
+    [line.strip() for line in open(STOP_WORDS_FILE, 'r').readlines()])
+
+
+def can_merge(entry: str) -> bool:
+    in_bilibili = entry + '.txt' in bilibili_list
+    in_weibo = entry + '.txt' in weibo_list
+    in_google = entry in google_list
+    all_in = in_bilibili and in_weibo and in_google
+    return all_in
+
+
+def extract_text(data: dict) -> str:
+    # Combine certain attributes from entry data
+    tags = ' '.join(data['tagList']) * 10
+    content = data['content'] * 5
+    video_content = ' '.join(
+        [video['description'] for video in data['videoList']])
+    weibo_content = ' '.join([weibo['content'] for weibo in data['weiboList']])
+    raw = ' '.join([tags, content, video_content, weibo_content])
+    # Cut sentences and remove stop words
+    words = list(filter(lambda w: w not in stopwords_set, jieba.cut(raw)))
+    text = ' '.join(words)
+    return text
+
+
 def main():
     merged_entry = set()
     if os.path.exists(MERGE_INEDX_FILE):
@@ -119,6 +145,19 @@ def main():
     # Merge all kinds of data
     if not os.path.exists(MERGE_DIR):
         os.mkdir(MERGE_DIR)
+    if not os.path.exists(CLOUD_DIR):
+        os.mkdir(CLOUD_DIR)
+    # Visualize progress using a progress bar
+    progress_bar = tqdm.tqdm(total=len(to_merge))
+    # Cloud object
+    cloud = WordCloud(font_path=FONT_PATH,
+                      background_color='white',
+                      max_words=20,
+                      max_font_size=250,
+                      width=1000,
+                      height=500,
+                      collocations=False)
+    # Merge data from all sources
     for entry, index in to_merge.items():
         try:
             jiki_file = id_to_file[index]
@@ -138,6 +177,13 @@ def main():
             data['image_list'] = image_list
             # Reformat data
             data = ensure_data(data)
+            # Draw word cloud
+            text = extract_text(data)
+            pic = cloud.generate(text)
+            pic_name = os.path.join(CLOUD_DIR, '{}.png'.format(entry))
+            pic.to_file(pic_name)
+            data['wordCloud'] = pic_name
+            # Save data
             with open(os.path.join(MERGE_DIR,
                                    '{}_{}.txt'.format(index, entry)), 'w') as f:
                 json.dump(data, f, ensure_ascii=False,
@@ -145,6 +191,8 @@ def main():
             merged_entry.add(entry)
         except Exception as e:
             logging.warning(e)
+        progress_bar.update(1)
+    progress_bar.close()
     logging.info('{} entries have been merged.'.format(len(to_merge)))
     with open(MERGE_INEDX_FILE, 'wb') as f:
         pickle.dump(merged_entry, f)
