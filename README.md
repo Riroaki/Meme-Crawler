@@ -14,6 +14,8 @@
 - [x] [微博](https://weibo.com)（文本内容）
 - [x] [谷歌](https://google.com)图片内容（需要翻墙）
 
+爬取一定数量后，执行脚本合并数据，把每一个梗的数据保存到指定的文件夹。
+
 主要基于`Scrapy`实现，经过测试发现小鸡百科等网站对爬虫的封锁较严，故加入`Selenium`作为中间件进行网页访问，然而目前还是存在ip被封的可能……务必谨慎驾驶。
 
 谷歌图片爬虫基于一个现成的python库`Google Images Download`完成。
@@ -52,6 +54,14 @@ $ ./run.sh [name] [time]
 
 ```shell
 $ python google.py
+```
+
+### 合并数据
+
+在`MemeCrawler`文件夹下，执行`merge.py`脚本进行合并数据：
+
+```shell
+$ python merge.py
 ```
 
 ### 注意
@@ -108,10 +118,54 @@ $ python google.py
 
 ### Google image——谷歌图片
 
-人家的工具就是稳，没得说。**不过需要打开全局代理运行**。
+**需要打开全局代理运行**。
 
 ![](screenshots/googlesuccess.png)
 
 图片：默认每一个词条爬取20张，并且放在子文件夹下。
 
 ![](screenshots/googledata.png)
+
+### 合并数据
+
+合并后数据格式：
+
+```json
+{
+    "name": "test",
+    "id": 0,
+    "time": "2019-07-12",
+    "img": "",
+    "view": 1300,
+    "like": 20,
+    "dislike": 3,
+    "tags": ["tag1", "tag2", "tag3"],
+    "content": "PHP is the best programming language among the world.",
+    "videoList": [
+      {
+        "aid": "12345678",
+      	"title": "PHPHPHPHPHPHPHPHPHPHP",
+      	"watch": "1万",
+      	"subtitle": "123",
+      	"time": "2019-07-12",
+      	"up": "aki",
+      	"description": "hello world."
+      }
+    ],
+    "imageList": [
+      "https://img_url"
+    ],
+    "weiboList": [
+      {
+          "user": "aki",
+          "avator": "https://avator_url",
+          "time": "今天12:00",
+          "imgList": "https://img_url",
+          "like": "1234",
+          "repost": "1234",
+          "source": "weibo.com",
+          "content": "Life is short, I use python:)"
+      }
+    ]
+  }
+```

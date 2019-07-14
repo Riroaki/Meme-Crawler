@@ -10,6 +10,8 @@ class GoogleSpider(object):
     name = 'google'
 
     def __init__(self):
+        # Max limit of videos for one keyword
+        self.limit = 5
         saved = {}
         if os.path.exists(GOOGLE_IMAGE_INDEX_FILE):
             with open(GOOGLE_IMAGE_INDEX_FILE, 'rb') as f:
@@ -23,12 +25,13 @@ class GoogleSpider(object):
         todo = []
         for k in all_dict.values():
             if k not in {'error', 'noname'} and k not in saved:
-                todo.append(k)
+                image_folder = os.path.join(GOOGLE_IMAGE_DIR, k)
+                if not os.path.exists(image_folder) or len(
+                        os.listdir(image_folder)) < self.limit:
+                    todo.append(k)
         # Randomly start to aviod stuck
         random.shuffle(todo)
         self.todo_list = todo
-        # Max limit of videos for one keyword
-        self.limit = 20
 
     def run(self) -> None:
         cmd_raw = ('googleimagesdownload'

@@ -1,7 +1,9 @@
 # README
 
-索引文件夹，存放各种爬虫的索引：
+索引文件夹，存放数据的索引，用于断点恢复：
 
-- JIKI_INDEX
-- BILIBILI_INDEX
-- WEIBO_INDEX
+- jiki_index: index file of jikipedia entries
+- bilibili_index: index file of bilibili videos
+- weibo_index: index file of weibo data
+- google_image_index: index file of google images
+- merged_index: index of merged files
