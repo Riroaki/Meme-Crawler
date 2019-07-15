@@ -1,8 +1,7 @@
 import os
 import pickle
 import random
-from settings import GOOGLE_IMAGE_DIR, GOOGLE_IMAGE_INDEX_FILE, \
-    JIKI_INDEX_FILE
+from settings import GOOGLE_IMAGE_DIR, JIKI_INDEX_FILE
 from logger import logger
 
 
@@ -12,11 +11,16 @@ class GoogleSpider(object):
     def __init__(self):
         # Max limit of videos for one keyword
         self.limit = 5
-        saved = {}
-        if os.path.exists(GOOGLE_IMAGE_INDEX_FILE):
-            with open(GOOGLE_IMAGE_INDEX_FILE, 'rb') as f:
-                saved = pickle.load(f)
-        self.saved_dict = saved
+        saved = set()
+        if not os.path.exists(GOOGLE_IMAGE_DIR):
+            os.mkdir(GOOGLE_IMAGE_DIR)
+        for path in os.listdir(GOOGLE_IMAGE_DIR):
+            if os.path.isdir(path):
+                full_path = os.path.join(GOOGLE_IMAGE_DIR, path)
+                if len(os.listdir(full_path)) < self.limit:
+                    os.remove(full_path)
+                else:
+                    saved.add(path)
         all_dict = {}
         if os.path.exists(JIKI_INDEX_FILE):
             with open(JIKI_INDEX_FILE, 'rb') as f:
@@ -25,10 +29,7 @@ class GoogleSpider(object):
         todo = []
         for k in all_dict.values():
             if k not in {'error', 'noname'} and k not in saved:
-                image_folder = os.path.join(GOOGLE_IMAGE_DIR, k)
-                if not os.path.exists(image_folder) or len(
-                        os.listdir(image_folder)) < self.limit:
-                    todo.append(k)
+                todo.append(k)
         # Randomly start to aviod stuck
         random.shuffle(todo)
         self.todo_list = todo
@@ -41,15 +42,13 @@ class GoogleSpider(object):
             for keyword in self.todo_list:
                 cmd = ' '.join([cmd_raw, '-k', keyword])
                 os.system(cmd)
-                self.saved_dict[keyword] = 'ok'
         except KeyboardInterrupt:
             self.close('Abort due to keyboard interrupt.')
         self.close('Finished.')
 
-    def close(self, reason):
+    @staticmethod
+    def close(reason):
         logger.info(reason)
-        with open(GOOGLE_IMAGE_INDEX_FILE, 'wb') as f:
-            pickle.dump(self.saved_dict, f)
         exit()
 
 

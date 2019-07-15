@@ -3,9 +3,9 @@ import re
 import json
 import pickle
 import logging
+import datetime
 import tqdm
 import jieba
-import numpy as np
 from wordcloud import WordCloud
 from settings import BILIBILI_DIR, JIKI_DIR, WEIBO_DIR, GOOGLE_IMAGE_DIR
 
@@ -69,7 +69,10 @@ def ensure_data(data: dict) -> dict:
                 content = content[: content.rfind(tail2)]
             img_list = re.findall('<img src="(.*?)"', content)
             weibo['imgList'] = ['https:' + img for img in img_list]
-            time = re.sub('\s+', '', time)
+            if time == '0000-00-00':
+                time = datetime.datetime.now().strftime('%Y-%m-%d')
+            else:
+                time = re.sub('\s+', '', time)
             weibo['content'] = content
             weibo['avator'] = avator
             weibo['time'] = time
@@ -105,12 +108,13 @@ def can_merge(entry: str) -> bool:
 
 def extract_text(data: dict) -> str:
     # Combine certain attributes from entry data
+    name = data['name'] * 5
     tags = ' '.join(data['tagList']) * 10
     content = data['content'] * 5
     video_content = ' '.join(
         [video['description'] for video in data['videoList']])
     weibo_content = ' '.join([weibo['content'] for weibo in data['weiboList']])
-    raw = ' '.join([tags, content, video_content, weibo_content])
+    raw = ' '.join([name, tags, content, video_content, weibo_content])
     # Cut sentences and remove stop words
     words = list(filter(lambda w: w not in stopwords_set, jieba.cut(raw)))
     text = ' '.join(words)
@@ -135,12 +139,20 @@ def main():
         else:
             entry_to_ids[entry].append(index)
     to_merge = {}
+    # Merge all items with same name
     for entry, id_list in entry_to_ids.items():
-        # Choose the file whose size is largest
-        size_list = [os.path.getsize(id_to_file[index]) for index in
-                     id_list]
-        remain = id_list[int(np.argmax(size_list))]
-        to_merge[entry] = remain
+        full = {}
+        for index in id_list:
+            with open(os.path.join(JIKI_DIR, '{}_{}.txt'.format(index, entry)),
+                      'r') as f:
+                data = json.load(f)
+                if len(full) < len(data):
+                    full.update(data)
+                else:
+                    full['tag_list'].extend(data['tag_list'])
+                    full['content'] += '\n\n' + data['content']
+        full['tag_list'] = list(set(full['tag_list']))
+        to_merge[entry] = full
     logging.info('{} entries to merge.'.format(len(to_merge)))
     # Merge all kinds of data
     if not os.path.exists(MERGE_DIR):
@@ -158,14 +170,11 @@ def main():
                       height=500,
                       collocations=False)
     # Merge data from all sources
-    for entry, index in to_merge.items():
+    for entry, data in to_merge.items():
         try:
-            jiki_file = id_to_file[index]
             bilibili_file = os.path.join(BILIBILI_DIR, entry + '.txt')
             weibo_file = os.path.join(WEIBO_DIR, entry + '.txt')
             google_dir = os.path.join(GOOGLE_IMAGE_DIR, entry)
-            with open(jiki_file, 'r') as f:
-                data = json.load(f)
             with open(bilibili_file, 'r') as f:
                 video_data = json.load(f)
                 data['video_list'] = video_data['video_list']
@@ -173,7 +182,8 @@ def main():
                 weibo_data = json.load(f)
                 data['weibo_list'] = weibo_data['weibo_list']
             image_list = list(filter(img_filter, os.listdir(google_dir)))
-            image_list = [os.path.join(entry, image) for image in image_list]
+            image_list = [os.path.join(GOOGLE_IMAGE_DIR, entry, image) for image
+                          in image_list]
             data['image_list'] = image_list
             # Reformat data
             data = ensure_data(data)
@@ -185,7 +195,8 @@ def main():
             data['wordCloud'] = pic_name
             # Save data
             with open(os.path.join(MERGE_DIR,
-                                   '{}_{}.txt'.format(index, entry)), 'w') as f:
+                                   '{}_{}.txt'.format(data['id'], entry)),
+                      'w') as f:
                 json.dump(data, f, ensure_ascii=False,
                           separators=(',', ':'), indent=4)
             merged_entry.add(entry)

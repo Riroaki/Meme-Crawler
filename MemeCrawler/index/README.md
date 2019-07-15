@@ -5,5 +5,4 @@
 - jiki_index: index file of jikipedia entries
 - bilibili_index: index file of bilibili videos
 - weibo_index: index file of weibo data
-- google_image_index: index file of google images
 - merged_index: index of merged files
