@@ -63,10 +63,10 @@ def ensure_data(data: dict) -> dict:
             tail2 = '\n&nbsp;来自\n'
             if head1 in content:
                 content = content[content.find(head1) + len(head1):]
-                content = content[: content.rfind(tail1)]
+                content = content[:content.rfind(tail1)]
             else:
                 content = content[content.find(head2) + len(head2):]
-                content = content[: content.rfind(tail2)]
+                content = content[:content.rfind(tail2)]
             img_list = re.findall('<img src="(.*?)"', content)
             weibo['imgList'] = ['https:' + img for img in img_list]
             if time == '0000-00-00':
@@ -78,13 +78,20 @@ def ensure_data(data: dict) -> dict:
             weibo['time'] = time
         return weibo_raw_list
 
-    res = {'id': data['index'], 'name': data['name'], 'time': data['time'],
-           'image': data['image_url'], 'view': process_value(data['view']),
-           'like': process_value(data['like']),
-           'dislike': process_value(data['dislike']),
-           'tagList': data['tag_list'], 'content': data['content'],
-           'imageList': data['image_list'], 'videoList': data['video_list'],
-           'weiboList': process_weibo(data['weibo_list'])}
+    res = {
+        'id': data['index'],
+        'name': data['name'],
+        'time': data['time'],
+        'image': data['image_url'],
+        'view': process_value(data['view']),
+        'like': process_value(data['like']),
+        'dislike': process_value(data['dislike']),
+        'tagList': data['tag_list'],
+        'content': data['content'],
+        'imageList': data['image_list'],
+        'videoList': data['video_list'],
+        'weiboList': process_weibo(data['weibo_list'])
+    }
     return res
 
 
@@ -130,7 +137,7 @@ def main():
     entry_to_ids = {}
     for fname in jiki_list:
         index = int(fname[:fname.find('_')])
-        entry = fname[fname.find('_') + 1: fname.rfind('.txt')]
+        entry = fname[fname.find('_') + 1:fname.rfind('.txt')]
         id_to_file[index] = os.path.join(JIKI_DIR, fname)
         if not can_merge(entry) or entry in merged_entry:
             continue
@@ -143,14 +150,23 @@ def main():
     for entry, id_list in entry_to_ids.items():
         full = {}
         for index in id_list:
-            with open(os.path.join(JIKI_DIR, '{}_{}.txt'.format(index, entry)),
-                      'r') as f:
-                data = json.load(f)
-                if len(full) < len(data):
-                    full.update(data)
-                else:
-                    full['tag_list'].extend(data['tag_list'])
-                    full['content'] += '\n\n' + data['content']
+            try:
+                with open(
+                        os.path.join(JIKI_DIR,
+                                     '{}_{}.txt'.format(index, entry)),
+                        'r') as f:
+                    data = json.load(f)
+                    if len(full) < len(data):
+                        full.update(data)
+                    else:
+                        full['tag_list'].extend(data['tag_list'])
+                        full['content'] += '\n\n' + data['content']
+            except Exception as e:
+                logging.warning('{}:{}'.format(entry, e))
+                merged_entry.add(entry)
+        # Skip invalid format
+        if len(full) == 0:
+            continue
         full['tag_list'] = list(set(full['tag_list']))
         to_merge[entry] = full
     logging.info('{} entries to merge.'.format(len(to_merge)))
@@ -162,13 +178,14 @@ def main():
     # Visualize progress using a progress bar
     progress_bar = tqdm.tqdm(total=len(to_merge))
     # Cloud object
-    cloud = WordCloud(font_path=FONT_PATH,
-                      background_color='white',
-                      max_words=20,
-                      max_font_size=250,
-                      width=1000,
-                      height=500,
-                      collocations=False)
+    cloud = WordCloud(
+        font_path=FONT_PATH,
+        background_color='white',
+        max_words=20,
+        max_font_size=250,
+        width=1000,
+        height=500,
+        collocations=False)
     # Merge data from all sources
     for entry, data in to_merge.items():
         try:
@@ -182,8 +199,10 @@ def main():
                 weibo_data = json.load(f)
                 data['weibo_list'] = weibo_data['weibo_list']
             image_list = list(filter(img_filter, os.listdir(google_dir)))
-            image_list = [os.path.join(GOOGLE_IMAGE_DIR, entry, image) for image
-                          in image_list]
+            image_list = [
+                os.path.join(GOOGLE_IMAGE_DIR, entry, image)
+                for image in image_list
+            ]
             data['image_list'] = image_list
             # Reformat data
             data = ensure_data(data)
@@ -194,14 +213,15 @@ def main():
             pic.to_file(pic_name)
             data['wordCloud'] = pic_name
             # Save data
-            with open(os.path.join(MERGE_DIR,
-                                   '{}_{}.txt'.format(data['id'], entry)),
-                      'w') as f:
-                json.dump(data, f, ensure_ascii=False,
-                          separators=(',', ':'), indent=4)
+            with open(
+                    os.path.join(MERGE_DIR, '{}_{}.txt'.format(
+                        data['id'], entry)), 'w') as f:
+                json.dump(data, f, ensure_ascii=False, separators=(',', ':'),
+                          indent=4)
             merged_entry.add(entry)
         except Exception as e:
-            logging.warning(e)
+            logging.warning('{}:{}'.format(entry, e))
+            merged_entry.add(entry)
         progress_bar.update(1)
     progress_bar.close()
     logging.info('{} entries have been merged.'.format(len(to_merge)))
