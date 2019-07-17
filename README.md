@@ -2,6 +2,10 @@
 
 > 基于Scrapy和Selenium的爬虫，爬取各种网络热词及其相关内容。
 
+### 先吃我一发安利：姚明是jojo！
+
+![](screenshots/姚明是jojo.png)
+
 ## 项目介绍
 
 本项目爬取梗相关的图文、视频等内容。首先进行梗百科的爬取：
@@ -186,4 +190,4 @@ $ python merge.py
 
 词云图片示例：【Github】
 
-![](screenshots/GitHub.png)
+![](screenshots/GitHub_wordcloud.png)

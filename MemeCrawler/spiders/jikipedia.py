@@ -17,7 +17,7 @@ class JikiSpider(scrapy.Spider):
 
     # Url format of Jikipedia
     enytry_url = 'https://jikipedia.com/definition/{index}'
-    max_index = 20000
+    max_index = 40000
 
     # Patterns
     pat_dict = {

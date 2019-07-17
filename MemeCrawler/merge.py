@@ -115,12 +115,13 @@ def can_merge(entry: str) -> bool:
 
 def extract_text(data: dict) -> str:
     # Combine certain attributes from entry data
-    name = data['name'] * 5
-    tags = ' '.join(data['tagList']) * 10
-    content = data['content'] * 5
+    name = data['name'] * 30
+    tags = ' '.join(data['tagList'] * 20)
+    content = data['content'] * 15
     video_content = ' '.join(
-        [video['description'] for video in data['videoList']])
-    weibo_content = ' '.join([weibo['content'] for weibo in data['weiboList']])
+        [video['description'] for video in data['videoList']] * 5)
+    weibo_content = ' '.join(
+        [weibo['content'] for weibo in data['weiboList']] * 10)
     raw = ' '.join([name, tags, content, video_content, weibo_content])
     # Cut sentences and remove stop words
     words = list(filter(lambda w: w not in stopwords_set, jieba.cut(raw)))
@@ -181,10 +182,9 @@ def main():
     cloud = WordCloud(
         font_path=FONT_PATH,
         background_color='white',
-        max_words=20,
-        max_font_size=250,
+        max_font_size=600,
         width=1000,
-        height=500,
+        height=600,
         collocations=False)
     # Merge data from all sources
     for entry, data in to_merge.items():

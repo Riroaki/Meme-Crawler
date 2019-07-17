@@ -5,7 +5,7 @@ function check() {
     delta=`expr ${count} - $1`
     if [[ 0 == ${delta} ]]; then
         echo "Starting $2"
-        nohup scrapy crawl $2 -L INFO &
+        scrapy crawl $2 -L INFO
     fi
 }
 
